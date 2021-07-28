@@ -1,29 +1,35 @@
+@file:Suppress("unused", "NOTHING_TO_INLINE")
+
 package com.dylanc.multitype
 
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.DiffUtil
+import com.drakeet.multitype.ItemViewDelegate
 import com.drakeet.multitype.MultiTypeAdapter
 
 
 typealias ItemsLiveData<T> = MutableLiveData<List<T>>
 
-fun MultiTypeAdapter(block: MultiTypeAdapter.() -> Unit) =
+inline fun <reified T : Any> MultiTypeAdapter(delegate: ItemViewDelegate<T, *>) =
+  MultiTypeAdapter { register(delegate) }
+
+inline fun MultiTypeAdapter(block: MultiTypeAdapter.() -> Unit) =
   MultiTypeAdapter().apply(block)
 
-fun <T : Any> MultiTypeAdapter.observeItems(
+inline fun <T : Any> MultiTypeAdapter.observeItemsChanged(
   owner: LifecycleOwner,
   items: LiveData<List<T>>,
   detectMoves: Boolean = true,
-  areItemsTheSame: (T, T) -> Boolean
+  noinline areItemsTheSame: (T, T) -> Boolean
 ) {
   items.observe(owner) {
-    notifyItemsChanged(it, detectMoves, areItemsTheSame)
+    submitItems(it, detectMoves, areItemsTheSame)
   }
 }
 
-fun <T : Any> MultiTypeAdapter.notifyItemsChanged(
+fun <T : Any> MultiTypeAdapter.submitItems(
   newItems: List<T>,
   detectMoves: Boolean = true,
   areItemsTheSame: (T, T) -> Boolean
