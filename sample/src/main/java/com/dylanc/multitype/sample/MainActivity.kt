@@ -5,8 +5,9 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.ListAdapter
 import com.dylanc.multitype.MultiTypeAdapter
-import com.dylanc.multitype.observeItems
+import com.dylanc.multitype.observeItemsChanged
 import com.dylanc.multitype.sample.databinding.ActivityMainBinding
 import com.dylanc.multitype.sample.items.Message
 import com.dylanc.multitype.sample.items.MessageViewDelegate
@@ -20,6 +21,8 @@ class MainActivity : AppCompatActivity() {
 
   private val binding: ActivityMainBinding by binding()
   private val viewModel: MainViewModel by viewModels()
+
+//  private val adapter = MultiTypeAdapter(TimeViewDelegate())
   private val adapter = MultiTypeAdapter {
     register(TimeViewDelegate())
     register(MessageViewDelegate())
@@ -28,10 +31,15 @@ class MainActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     binding.recyclerView.adapter = adapter
-    adapter.observeItems(this, viewModel.items) { oldItem, newItem ->
+
+//    adapter.observeItemsChanged(this, viewModel.items) { oldItem, newItem ->
+//      oldItem == newItem
+//    }
+    adapter.observeItemsChanged(this, viewModel.items) { oldItem, newItem ->
       (oldItem is String && newItem is String && oldItem == newItem) ||
           (oldItem is Message && newItem is Message && oldItem.id == newItem.id)
     }
+
   }
 
   override fun onCreateOptionsMenu(menu: Menu?): Boolean {
