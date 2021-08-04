@@ -18,6 +18,9 @@ inline fun <reified T : Any> MultiTypeAdapter(delegate: ItemViewDelegate<T, *>) 
 inline fun MultiTypeAdapter(block: MultiTypeAdapter.() -> Unit) =
   MultiTypeAdapter().apply(block)
 
+inline fun <reified T : Any> MultiTypeAdapter.register(vararg delegate: ItemViewDelegate<T, *>) =
+  register(T::class).to(*delegate)
+
 inline fun <T : Any> MultiTypeAdapter.observeItemsChanged(
   owner: LifecycleOwner,
   items: LiveData<List<T>>,

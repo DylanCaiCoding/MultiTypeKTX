@@ -1,4 +1,4 @@
-package com.dylanc.multitype.sample.items
+package com.dylanc.multitype.sample.message.items
 
 import android.content.Context
 import android.view.ViewGroup

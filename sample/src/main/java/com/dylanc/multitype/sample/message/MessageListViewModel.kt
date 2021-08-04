@@ -1,13 +1,13 @@
-package com.dylanc.multitype.sample
+package com.dylanc.multitype.sample.message
 
 import androidx.lifecycle.ViewModel
 import com.dylanc.multitype.ItemsLiveData
-import com.dylanc.multitype.sample.items.Message
+import com.dylanc.multitype.sample.message.items.Message
 
 /**
  * @author Dylan Cai
  */
-class MainViewModel : ViewModel() {
+class MessageListViewModel : ViewModel() {
 
   private val data1 = listOf(
     "Today",

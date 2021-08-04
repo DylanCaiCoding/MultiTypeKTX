@@ -1,4 +1,4 @@
-package com.dylanc.multitype.sample.items
+package com.dylanc.multitype.sample.message.items
 
 /**
  * @author Dylan Cai
