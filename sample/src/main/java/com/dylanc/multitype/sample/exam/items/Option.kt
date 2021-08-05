@@ -8,6 +8,6 @@ import com.dylanc.multitype.ICheckable
 data class Option(
   override val groupId: Int,
   val name: String,
-  val singleChoice: Boolean,
+  val isSingleChoice: Boolean,
   override var isChecked: Boolean = false
 ) : ICheckable

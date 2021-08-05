@@ -1,18 +1,12 @@
 package com.dylanc.multitype.sample.exam
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import com.dylanc.multitype.ItemsLiveData
 import com.dylanc.multitype.MultiTypeAdapter
-import com.dylanc.multitype.observeItemsChanged
 import com.dylanc.multitype.register
 import com.dylanc.multitype.sample.databinding.ActivityListBinding
 import com.dylanc.multitype.sample.exam.items.*
 import com.dylanc.viewbinding.binding
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 /**
  * @author Dylan Cai
@@ -24,7 +18,11 @@ class ExamActivity : AppCompatActivity() {
     register(QuestionViewDelegate())
     register(RadioOptionViewDelegate(), MultipleOptionViewDelegate())
       .withKotlinClassLinker { _, item ->
-        if (item.singleChoice) RadioOptionViewDelegate::class else MultipleOptionViewDelegate::class
+        if (item.isSingleChoice) {
+          RadioOptionViewDelegate::class
+        } else {
+          MultipleOptionViewDelegate::class
+        }
       }
   }
 
