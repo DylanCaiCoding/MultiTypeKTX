@@ -4,6 +4,8 @@
 
 [MultiType](https://github.com/drakeet/MultiType) library makes it easier and more flexible to create multiple types for Android RecyclerView, then this library can help you make it easier to use MultiType library in Kotlin.
 
+If you want to use `ViewBinding` more easily in the MultiType, you can use my other [ViewBindingKTX](https://github.com/DylanCaiCoding/ViewBindingKTX) library.
+
 ## Getting started
 
 Add it in your root `build.gradle` at the end of repositories:
@@ -22,17 +24,21 @@ Add dependencies：
 ```groovy
 dependencies {
     implementation 'com.drakeet.multitype:multitype:4.3.0'
-    implementation 'com.github.DylanCaiCoding:MultiTypeKTX:0.1.0'
+    implementation 'com.github.DylanCaiCoding:MultiTypeKTX:0.2.0'
 }
 ```
 
 ## Usage
 
-### Jetpack MVVM + MultiType + DiffUtil
+### Initialize the MultiTypeAdapter
 
-#### The usage of a multi-type list:
+Register a single `ViewDelegate` , for example:
 
-You can register multiple `ViewDelegate` with cleaner code, for example:
+```kotlin
+private val adapter = MultiTypeAdapter(TextViewDelegate())
+```
+
+Register multiple `ViewDelegate` , for example:
 
 ```kotlin
 private val adapter = MultiTypeAdapter {
@@ -41,15 +47,38 @@ private val adapter = MultiTypeAdapter {
 }
 ```
 
-Add a variable of the `ItemsLiveData<Any>` type in `ViewModel`, for example:
+Register one-to-many `ViewDelegate` , for example:
 
 ```kotlin
-class MainViewModel : ViewModel() {
+private val adapter = MultiTypeAdapter {
+  register(RadioOptionViewDelegate(), MultipleOptionViewDelegate())
+    .withKotlinClassLinker { _, item ->
+      if (item.isSingleChoice) {
+        RadioOptionViewDelegate::class
+      } else {
+        MultipleOptionViewDelegate::class
+      }
+    }
+}
+```
+
+### Jetpack MVVM + MultiType + DiffUtil
+
+#### Step 1. Add a variable of the `ItemsLiveData<T>` type in `ViewModel`, for example:
+
+```kotlin
+class MessageListViewModel : ViewModel() {
   val items = ItemsLiveData<Any>()
 }
 ```
 
-Observe items changes. The code block returns whether the old and new items are the same, for example:
+##### Or if you register a single `ViewDelegate`, you can use specific types, for example: 
+
+```kotlin
+val items = ItemsLiveData<Message>()
+```
+
+#### Step 2. Observe items changes. The code block returns whether the old and new items are the same, for example:
 
 ```kotlin
 adapter.observeItemsChanged(this, viewModel.items) { oldItem, newItem ->
@@ -58,49 +87,57 @@ adapter.observeItemsChanged(this, viewModel.items) { oldItem, newItem ->
 }
 ```
 
-After changing the list data, you can set the list data to the `ItemsLiveData<Any>` variable, for example:
+#### Step 3. After changing the list data, you can set the list data to the `ItemsLiveData<T>` variable, for example:
 
 ```kotlin
 items.value = list
 ```
 
-#### The usage of a single-type list:
+### Check one or more
 
-You can register a single `ViewDelegate` with cleaner code, for example:
+#### Step 1. The entity class implement `ICheckable` interface, for example:
 
 ```kotlin
-private val adapter = MultiTypeAdapter(TextViewDelegate())
+data class Option(
+  val id : Int,
+  val name: String,
+  override val groupId: Int, // Add it when you need to check it separately
+  override var isChecked: Boolean = false
+) : ICheckable
 ```
 
-Add a variable of the `ItemsLiveData<T>` type in `ViewModel`, for example:
+#### Step 2. Create a class extends `CheckableItemViewDelegate<T : ICheckable, VH : ViewHolder>`, for example:
 
 ```kotlin
-class MainViewModel : ViewModel() {
-  val items = ItemsLiveData<Message>()
+class RadioOptionViewDelegate :
+  CheckableItemViewDelegate<Option, BindingViewHolder<ItemOptionBinding>>(CheckType.SINGLE) {
+
+  override fun onCreateViewHolder(context: Context, parent: ViewGroup) =
+    BindingViewHolder<ItemOptionBinding>(parent)
+      .onItemClick { position ->
+        checkItem(position) // When you need to change the checked state
+      }
+
+  override fun onBindViewHolder(holder: BindingViewHolder<ItemOptionBinding>, item: Option) {
+    with(holder.binding) {
+      checkBox.text = item.name
+      checkBox.isChecked = item.isChecked
+    }
+  }
 }
 ```
 
-Observe items changes. The code block returns whether the old and new items are the same, for example:
+The constructor of  `CheckableItemViewDelegate` has a `CheckType` argument. There are the following options.
 
-```kotlin
-adapter.observeItemsChanged(this, viewModel.items) { oldItem, newItem ->
-  oldItem.id == newItem.id
-}
-```
-
-After changing the list data, you can set the list data to the `ItemsLiveData<T>` variable, for example:
-
-```kotlin
-items.value = list
-```
+| type                    | function                    |
+| ----------------------- | --------------------------- |
+| CheckType.SINGLE        | Single choice               |
+| CheckType.MULTIPLE      | Multiple choice             |
+| CheckType.limit(number) | Limit the number of checked |
 
 ## Change log
 
 [Releases](https://github.com/DylanCaiCoding/MultiTypeKTX/releases)
-
-## TODO
-
-- CheckableItemViewDelegate
 
 ## License
 
